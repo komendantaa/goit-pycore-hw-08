@@ -1,7 +1,9 @@
+import pickle
 from typing import List, Dict, cast
+from datetime import date
+
 from decorators import input_error, contact_exists
 from utils import parse_input
-from datetime import date
 from models import AddressBook, Record, Birthday
 
 
@@ -64,51 +66,32 @@ def show_birthday(args: List[str], book: AddressBook) -> Birthday | None:
 
 
 @input_error
-def birthdays(args: List[str], book: AddressBook) -> List[Dict[str, date]]:
+def birthdays(args: List[str], book: AddressBook) -> str:
     return book.get_upcoming_birthdays()
 
 
+def load_data(filename="addressbook.pkl") -> AddressBook:
+    try:
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return AddressBook()
+
+
+def save_data(book: AddressBook, filename="addressbook.pkl") -> None:
+    with open(filename, "wb") as f:
+        pickle.dump(book, f)
+
+
 def main():
-    book = AddressBook()
+    # Завантаження даних з файлу
+    book: AddressBook = load_data()
     print("Welcome to the assistant bot!")
+
+    # Цикл введення команд користувача
     while True:
         user_input = input("Enter a command: ")
         cmd, args = parse_input(user_input)
-
-        """
-            TODO: remove
-
-            Commands looks not so consistent and flexible for me.
-            add     - add contact
-            change  - change phone only. In which way to change phone if have an array of phones? Replace? What if I want to add phone?
-            phone   - show phone. Why subject "phone" between actions?
-            delete  - delete contact. How to delete only 1 phone or remove just birthday?
-            all     - show all contacts.
-            birthdays - whow upcoming birthdays.
-            add-birthday, show-birthday - not consistent with previous....
-
-            Suggestion:
-                <action> <subject or subject alias> [...args]
-
-            contacts (c, contact):
-                add c <name> <phone> [<date>] - I think it's better throw err if exists.
-                show c <name>
-                delete c <name>
-                all
-            phones (p, phone):
-                add p <name> <phone>
-                show p <name>
-                update p <name> <prev_phone> <new_phone>
-                delete p <name> <phone>
-            birthdays (b, b-day, birthday):
-                add b <name> <date>
-                show b <name>
-                update b <name> <date>
-                delete b <name> <phone>
-
-            
-            Can I use this structure next time ?
-        """
 
         if cmd in ["close", "exit"]:
             print("Goodbye!")
@@ -133,6 +116,9 @@ def main():
             print(book)
         else:
             print("Invalid command.")
+
+    # Збереження даних у файл
+    save_data(book)
 
 
 if __name__ == "__main__":

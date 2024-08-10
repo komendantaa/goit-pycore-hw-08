@@ -10,7 +10,7 @@ class Record:
 
     def __repr__(self) -> str:
         phones_str = "; ".join(p.value for p in self.phones)
-        return f"Contact name: {self.name.value}, phones: {phones_str}, birthday: {self.birthday or '-'}"
+        return f"name: {self.name.value}, birthday: {self.birthday or 'n/a'}, phones: {phones_str}"
 
     def put_phone(self, phone: str) -> None:
         found = self.find_phone(phone)
